@@ -1,11 +1,8 @@
-'use client'
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import NavLink from './NavLink'
 import NavProfile from './NavProfile'
-import { BsFillGrid1X2Fill, BsFillHouseFill, BsFire, BsInfoCircleFill } from 'react-icons/bs'
-import { createClient } from '@/utils/supabase/client'
+import { BsFillGrid1X2Fill, BsFillHouseFill, BsFire, BsInfoCircleFill, BsArrowRightSquareFill } from 'react-icons/bs'
+import { createClient } from '@/utils/supabase/server'
 
 interface NavbarLink {
     id: number;
@@ -34,11 +31,15 @@ const Navbar = async () => {
             href: '/about',
             label: 'About',
         },
+        {
+            id: 4,
+            icon: <BsArrowRightSquareFill />,
+            href: '/login',
+            label: 'Login',
+        },
     ];
 
-    const url = usePathname();
-
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {data: {user}} = await supabase
         .auth
@@ -52,9 +53,9 @@ const Navbar = async () => {
             </div>
             <div className='flex my-auto'>
                 <div className='flex gap-8 my-auto'>
-                    {navlinks.map((link) => <NavLink key={link.id} icon={link.icon} href={link.href} label={link.label} active={url === link.href} />)}
+                    {navlinks.map((link) => <NavLink key={link.id} icon={link.icon} href={link.href} label={link.label} />)}
                 </div>
-                {user ? <NavProfile email={user?.email} /> : <p className='text-emerald-400'>NO USER</p>}
+                {user && <NavProfile email={user?.email} />}
             </div>
         </nav>
     );
