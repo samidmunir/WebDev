@@ -3,7 +3,9 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import NavLink from './NavLink'
+import NavProfile from './NavProfile'
 import { BsFillGrid1X2Fill, BsFillHouseFill, BsFire, BsInfoCircleFill } from 'react-icons/bs'
+import { createClient } from '@/utils/supabase/client'
 
 interface NavbarLink {
     id: number;
@@ -12,8 +14,7 @@ interface NavbarLink {
     label: string;
 }
 
-
-const Navbar = () => {
+const Navbar = async () => {
     const navlinks: NavbarLink[] = [
         {
             id: 1,
@@ -37,7 +38,11 @@ const Navbar = () => {
 
     const url = usePathname();
 
-    const [loggedIn, setLoggedIn] = useState<boolean>(true);
+    const supabase = createClient();
+
+    const {data: {user}} = await supabase
+        .auth
+        .getUser();
 
     return (
         <nav className='flex justify-between align-middle bg-stone-900 px-8 py-4'>
@@ -49,9 +54,7 @@ const Navbar = () => {
                 <div className='flex gap-8 my-auto'>
                     {navlinks.map((link) => <NavLink key={link.id} icon={link.icon} href={link.href} label={link.label} active={url === link.href} />)}
                 </div>
-                <div className='my-auto text-emerald-400 mx-8 border-4 border-emerald-400 py-1 px-2 hover:bg-emerald-400 hover:text-stone-900 hover:scale-110 transition-all cursor-default'>
-                    {loggedIn && <p>example@email.com</p>}
-                </div>
+                {user ? <NavProfile email={user?.email} /> : <p className='text-emerald-400'>NO USER</p>}
             </div>
         </nav>
     );

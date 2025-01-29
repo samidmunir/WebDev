@@ -1,9 +1,34 @@
+'use client'
 import { BsEnvelopeFill, BsShieldLockFill } from 'react-icons/bs'
 import LoginButton from './LoginButton'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signIn } from '@/actions/auth'
 
 const LoginForm = () => {
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const router = useRouter();
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        const formData = new FormData(event.currentTarget);
+        const result = await signIn(formData);
+
+        if (result.status === 'success') {
+            router.push('/');
+        } else {
+            setError(result.status);
+        }
+
+        setLoading(false);
+    }
+
     return (
-        <form className='bg-stone-900 w-[300px] ml-16 p-8'>
+        <form onSubmit={handleSubmit} className='bg-stone-900 w-[300px] ml-16 p-8'>
             <section className='text-center'>
                 <div className='flex justify-between w-[200px] mx-auto'>
                     <label className='text-emerald-400 font-semibold text-xl'>Email</label>
@@ -31,8 +56,9 @@ const LoginForm = () => {
                 />
             </section>
             <section className='text-center mt-8'>
-                <LoginButton />
+                <LoginButton loading={loading} />
             </section>
+            {error && <p className='text-red-500 font-bold'>{error}</p>}
         </form>
     );
 }
